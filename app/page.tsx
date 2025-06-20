@@ -21,6 +21,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import Image from "next/image";
 
 const chartConfig = {
   amount: {
@@ -36,7 +37,6 @@ export default function Home() {
   const [addedAmount, setAddedAmount] = useState(0);
   const [goalAmount, setGoalAmount] = useState(2000000);
   const [goalInputValue, setGoalInputValue] = useState("");
-  const [isEditingCurrent, setIsEditingCurrent] = useState(false);
   const [currentInputValue, setCurrentInputValue] = useState("");
   const [isCelebrating, setIsCelebrating] = useState(false);
   const [hasHitTarget, setHasHitTarget] = useState(false);
@@ -141,23 +141,16 @@ export default function Home() {
     }
   };
 
-  const handleCurrentEdit = () => {
-    setIsEditingCurrent(true);
-    setCurrentInputValue(currentAmount.toString());
-  };
-
   const handleCurrentSave = () => {
     const numericValue = currentInputValue.replace(/\s/g, "");
     const amount = parseFloat(numericValue);
     if (!isNaN(amount) && amount >= 0) {
       setCurrentAmount(amount);
     }
-    setIsEditingCurrent(false);
     setCurrentInputValue("");
   };
 
   const handleCurrentCancel = () => {
-    setIsEditingCurrent(false);
     setCurrentInputValue("");
   };
 
@@ -679,16 +672,17 @@ export default function Home() {
                   {/* MASSIVE SCREEN-FILLING Logo */}
                   <div className="mb-8 flex justify-center w-full">
                     <div 
-                      className="w-[90vw] h-[40vh] bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 rounded-3xl p-8 flex items-center justify-center border-8 border-white shadow-2xl"
+                      className="relative w-[90vw] h-[40vh] bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 rounded-3xl p-8 flex items-center justify-center border-8 border-white shadow-2xl"
                       style={{ 
                         animation: 'logoSpin 4s ease-in-out infinite',
                         boxShadow: '0 0 100px rgba(255,255,255,1), 0 0 200px rgba(255,255,255,0.8), inset 0 0 50px rgba(255,255,255,0.3)'
                       }}
                     >
-                      <img 
+                      <Image 
                         src="/rehngruppen-logo-white.svg" 
                         alt="Rehngruppen Logo" 
-                        className="w-full h-full object-contain"
+                        fill
+                        className="object-contain"
                         style={{ 
                           filter: 'brightness(4) contrast(2) drop-shadow(0 0 20px rgba(255,255,255,1)) drop-shadow(0 0 40px rgba(255,255,255,0.8))',
                           transform: 'scale(1.1)'
