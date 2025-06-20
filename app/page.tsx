@@ -1,160 +1,178 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Bar, BarChart, ReferenceLine, ResponsiveContainer, YAxis, XAxis } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { ChartContainer } from "@/components/ui/chart"
-import { Plus, Edit3 } from "lucide-react"
+import { useState } from "react";
+import {
+  Bar,
+  BarChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  YAxis,
+  XAxis,
+} from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Plus, Settings } from "lucide-react";
+import { ChartContainer } from "@/components/ui/chart";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const chartConfig = {
   amount: {
-    label: "Fakturerat belopp",
+    label: "Belopp",
     color: "#180f26",
   },
-}
+};
 
 export default function Home() {
-  const [currentAmount, setCurrentAmount] = useState(125000)
-  const [inputValue, setInputValue] = useState("")
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [addedAmount, setAddedAmount] = useState(0)
-  const [goalAmount, setGoalAmount] = useState(500000)
-  const [isEditingGoal, setIsEditingGoal] = useState(false)
-  const [goalInputValue, setGoalInputValue] = useState("")
-  const [startingInputValue, setStartingInputValue] = useState("")
-  const [isEditingCurrent, setIsEditingCurrent] = useState(false)
-  const [currentInputValue, setCurrentInputValue] = useState("")
-  
+  const [currentAmount, setCurrentAmount] = useState(750000);
+  const [inputValue, setInputValue] = useState("");
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [addedAmount, setAddedAmount] = useState(0);
+  const [goalAmount, setGoalAmount] = useState(2000000);
+  const [goalInputValue, setGoalInputValue] = useState("");
+  const [isEditingCurrent, setIsEditingCurrent] = useState(false);
+  const [currentInputValue, setCurrentInputValue] = useState("");
+  const [isCelebrating, setIsCelebrating] = useState(false);
+  const [hasHitTarget, setHasHitTarget] = useState(false);
+  const [celebrationPhase, setCelebrationPhase] = useState(0); // 0: confetti, 1: rocket, 2: people
+
   const data = [
     {
-      category: "Fakturor",
+      category: "Fakturering",
       amount: currentAmount,
     },
-  ]
+  ];
 
   const formatNumberInput = (value: string) => {
-    // Remove all non-digit characters
-    const numericValue = value.replace(/\D/g, '')
-    // Format with Swedish thousand separators (spaces)
-    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-  }
+    const numericValue = value.replace(/\D/g, "");
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatNumberInput(e.target.value)
-    setInputValue(formatted)
-  }
+    const formatted = formatNumberInput(e.target.value);
+    setInputValue(formatted);
+  };
 
   const handleAddAmount = () => {
-    // Remove spaces to get the numeric value
-    const numericValue = inputValue.replace(/\s/g, '')
-    const amount = parseFloat(numericValue)
+    const numericValue = inputValue.replace(/\s/g, "");
+    const amount = parseInt(numericValue);
     if (!isNaN(amount) && amount > 0) {
-      setAddedAmount(amount)
-      setIsAnimating(true)
-      setCurrentAmount(prev => prev + amount)
-      setInputValue("")
+      const newAmount = currentAmount + amount;
+      const wasUnderTarget = currentAmount < goalAmount;
+      const isNowOverTarget = newAmount >= goalAmount;
       
-      // Reset animation after 2 seconds
+      setCurrentAmount(newAmount);
+      setAddedAmount(amount);
+      setInputValue("");
+      setIsAnimating(true);
+      
+      // Check if we just hit the target for the first time
+      if (wasUnderTarget && isNowOverTarget && !hasHitTarget) {
+        setHasHitTarget(true);
+        setIsCelebrating(true);
+        setCelebrationPhase(0);
+        
+        // Phase 1: Confetti & fireworks (4 seconds)
+        setTimeout(() => {
+          setCelebrationPhase(1);
+        }, 4000);
+        
+        // Phase 2: Saturn message (4 seconds later)
+        setTimeout(() => {
+          setCelebrationPhase(2);
+        }, 8000);
+        
+        // Phase 3: People cheering (4 seconds later)
+        setTimeout(() => {
+          setCelebrationPhase(3);
+        }, 12000);
+        
+        // End celebration (4 seconds later)
+        setTimeout(() => {
+          setIsCelebrating(false);
+          setCelebrationPhase(0);
+        }, 16000);
+      }
+      
       setTimeout(() => {
-        setIsAnimating(false)
-        setAddedAmount(0)
-      }, 2000)
+        setIsAnimating(false);
+        setAddedAmount(0);
+      }, 4000);
     }
-  }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleAddAmount()
+    if (e.key === "Enter") {
+      handleAddAmount();
     }
-  }
-
-  const handleGoalEdit = () => {
-    setIsEditingGoal(true)
-    setGoalInputValue(goalAmount.toString())
-    setStartingInputValue(currentAmount.toString())
-  }
+  };
 
   const handleGoalSave = () => {
-    const goalNumericValue = goalInputValue.replace(/\s/g, '')
-    const goalAmountValue = parseFloat(goalNumericValue)
-    
-    const startingNumericValue = startingInputValue.replace(/\s/g, '')
-    const startingAmountValue = parseFloat(startingNumericValue)
-    
+    const goalNumericValue = goalInputValue.replace(/\s/g, "");
+    const goalAmountValue = parseFloat(goalNumericValue);
+
     if (!isNaN(goalAmountValue) && goalAmountValue > 0) {
-      setGoalAmount(goalAmountValue)
+      setGoalAmount(goalAmountValue);
     }
-    
-    if (!isNaN(startingAmountValue) && startingAmountValue >= 0) {
-      setCurrentAmount(startingAmountValue)
-    }
-    
-    setIsEditingGoal(false)
-    setGoalInputValue("")
-    setStartingInputValue("")
-  }
+
+    setGoalInputValue("");
+  };
 
   const handleGoalCancel = () => {
-    setIsEditingGoal(false)
-    setGoalInputValue("")
-    setStartingInputValue("")
-  }
+    setGoalInputValue("");
+  };
 
   const handleGoalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatNumberInput(e.target.value)
-    setGoalInputValue(formatted)
-  }
-
-  const handleStartingInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatNumberInput(e.target.value)
-    setStartingInputValue(formatted)
-  }
+    const formatted = formatNumberInput(e.target.value);
+    setGoalInputValue(formatted);
+  };
 
   const handleGoalKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleGoalSave()
-    } else if (e.key === 'Escape') {
-      handleGoalCancel()
+    if (e.key === "Enter") {
+      handleGoalSave();
+    } else if (e.key === "Escape") {
+      handleGoalCancel();
     }
-  }
+  };
 
   const handleCurrentEdit = () => {
-    setIsEditingCurrent(true)
-    setCurrentInputValue(currentAmount.toString())
-  }
+    setIsEditingCurrent(true);
+    setCurrentInputValue(currentAmount.toString());
+  };
 
   const handleCurrentSave = () => {
-    const numericValue = currentInputValue.replace(/\s/g, '')
-    const amount = parseFloat(numericValue)
+    const numericValue = currentInputValue.replace(/\s/g, "");
+    const amount = parseFloat(numericValue);
     if (!isNaN(amount) && amount >= 0) {
-      setCurrentAmount(amount)
+      setCurrentAmount(amount);
     }
-    setIsEditingCurrent(false)
-    setCurrentInputValue("")
-  }
+    setIsEditingCurrent(false);
+    setCurrentInputValue("");
+  };
 
   const handleCurrentCancel = () => {
-    setIsEditingCurrent(false)
-    setCurrentInputValue("")
-  }
+    setIsEditingCurrent(false);
+    setCurrentInputValue("");
+  };
 
   const handleCurrentInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatNumberInput(e.target.value)
-    setCurrentInputValue(formatted)
-  }
+    const formatted = formatNumberInput(e.target.value);
+    setCurrentInputValue(formatted);
+  };
 
   const handleCurrentKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleCurrentSave()
-    } else if (e.key === 'Escape') {
-      handleCurrentCancel()
+    if (e.key === "Enter") {
+      handleCurrentSave();
+    } else if (e.key === "Escape") {
+      handleCurrentCancel();
     }
-  }
-
-  const progress = (currentAmount / goalAmount) * 100
-  const remaining = goalAmount - currentAmount
+  };
 
   return (
     <>
@@ -162,385 +180,822 @@ export default function Home() {
         @keyframes fadeSlideUp {
           0% {
             opacity: 0;
-            transform: translateY(20px) scale(0.8);
+            transform: translateY(30px) scale(0.9);
           }
-          15% {
+          8% {
             opacity: 1;
             transform: translateY(0px) scale(1);
           }
-          85% {
+          92% {
             opacity: 1;
             transform: translateY(0px) scale(1);
           }
           100% {
             opacity: 0;
-            transform: translateY(-5px) scale(0.95);
+            transform: translateY(-10px) scale(0.95);
           }
         }
-        
+
         @keyframes barShimmer {
           0% {
             filter: brightness(1);
           }
           50% {
-            filter: brightness(1.3);
+            filter: brightness(1.2);
           }
           100% {
             filter: brightness(1);
           }
         }
-        
-        .recharts-bar-rectangle {
-          mask: linear-gradient(to bottom, white 0%, white calc(100% - 2px), transparent calc(100% - 2px), transparent 100%);
+
+        @keyframes confettiFall {
+          0% {
+            transform: translateY(-100vh) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+          }
+        }
+
+        @keyframes firework {
+          0% {
+            transform: scale(0) rotate(0deg);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.5) rotate(180deg);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(0.5) rotate(360deg);
+            opacity: 0;
+          }
+        }
+
+        @keyframes rainbow {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes bounce {
+          0%, 20%, 53%, 80%, 100% {
+            transform: translate3d(0,0,0) scale(1);
+          }
+          40%, 43% {
+            transform: translate3d(0,-30px,0) scale(1.1);
+          }
+          70% {
+            transform: translate3d(0,-15px,0) scale(1.05);
+          }
+          90% {
+            transform: translate3d(0,-4px,0) scale(1.02);
+          }
+        }
+
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(111, 246, 183, 0.7);
+          }
+          70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 20px rgba(111, 246, 183, 0);
+          }
+          100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(111, 246, 183, 0);
+          }
+        }
+
+        @keyframes sparkle {
+          0%, 100% {
+            transform: scale(0) rotate(0deg);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1) rotate(180deg);
+            opacity: 1;
+          }
+        }
+
+        @keyframes screenShake {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          10% { transform: translate(-2px, -2px) rotate(-0.5deg); }
+          20% { transform: translate(-4px, 0px) rotate(0.5deg); }
+          30% { transform: translate(4px, 2px) rotate(0deg); }
+          40% { transform: translate(1px, -1px) rotate(0.5deg); }
+          50% { transform: translate(-1px, 2px) rotate(-0.5deg); }
+          60% { transform: translate(-4px, 1px) rotate(0deg); }
+          70% { transform: translate(2px, 1px) rotate(-0.5deg); }
+          80% { transform: translate(-2px, -1px) rotate(0.5deg); }
+          90% { transform: translate(2px, 2px) rotate(0deg); }
+        }
+
+        .celebration-bg {
+          background: linear-gradient(-45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b, #eb4d4b, #6c5ce7, #a29bfe);
+          background-size: 400% 400%;
+          animation: rainbow 2s ease infinite;
+        }
+
+        .confetti {
+          animation: confettiFall 3s linear infinite;
+        }
+
+        .firework {
+          animation: firework 1s ease-out infinite;
+        }
+
+        .sparkle {
+          animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        .bounce {
+          animation: bounce 2s infinite;
+        }
+
+        .pulse {
+          animation: pulse 2s infinite;
+        }
+
+        .shake {
+          animation: screenShake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes rocketLaunch {
+          0% {
+            transform: translateX(-50%) translateY(0) scale(1);
+          }
+          100% {
+            transform: translateX(-50%) translateY(-120vh) scale(0.3);
+          }
+        }
+
+        @keyframes flameFlicker {
+          0% {
+            opacity: 0.6;
+            transform: translateX(-50%) scaleY(1);
+          }
+          100% {
+            opacity: 0.9;
+            transform: translateX(-50%) scaleY(1.2);
+          }
+        }
+
+        @keyframes rocketToSaturn {
+          0% {
+            transform: translateX(-150px) translateY(75px) scale(1.2) rotate(-20deg);
+            opacity: 0.8;
+          }
+          25% {
+            transform: translateX(-75px) translateY(37px) scale(1.5) rotate(-10deg);
+            opacity: 0.9;
+          }
+          50% {
+            transform: translateX(0px) translateY(0px) scale(2) rotate(0deg);
+            opacity: 1;
+          }
+          75% {
+            transform: translateX(75px) translateY(-37px) scale(1.5) rotate(10deg);
+            opacity: 0.9;
+          }
+          100% {
+            transform: translateX(150px) translateY(-75px) scale(1.2) rotate(20deg);
+            opacity: 0.8;
+          }
         }
       `}</style>
-      <div className="h-screen w-screen p-6 font-[family-name:var(--font-geist-sans)] overflow-hidden" style={{ backgroundColor: "#180f26" }}>
-      <div className="h-full max-w-6xl mx-auto flex flex-col">
-        
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center mb-4">
-            <img 
-              src="/rehngruppen-symbol-white.svg" 
-              alt="Rehngruppen" 
-              className="h-24 w-auto"
-            />
-          </div>
-          <div className="flex items-center justify-center mb-2">
-            {/* <Target className="h-4 w-4 text-gray-400 mr-2" /> */}
-            <span className="text-lg font-medium text-gray-500 uppercase tracking-wide">
-              Rehngruppens Fakturamål Juni 2025
-            </span>
-          </div>
-        </div>
 
-        {/* Main Content Grid */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
-          
-          {/* Left Panel */}
-          <div className="flex flex-col space-y-4">
+      <div className={`h-screen w-full font-[family-name:var(--font-geist-sans)] ${isCelebrating ? 'celebration-bg shake' : 'bg-slate-50'}`}>
+        {/* MASSIVE CELEBRATION OVERLAY */}
+        {isCelebrating && (
+          <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
             
-            {/* Stats */}
-            <div className="grid grid-cols-1 gap-3">
-              <Card 
-                className="border border-gray-700 shadow-sm bg-gray-800/50 cursor-pointer hover:bg-gray-800/70 transition-colors"
-                onClick={!isEditingCurrent ? handleCurrentEdit : undefined}
-              >
-                <CardContent className="p-4">
-                  {isEditingCurrent ? (
-                    <div className="space-y-3">
+            {/* PHASE 1: Confetti & Fireworks */}
+            {celebrationPhase === 0 && (
+              <>
+                {/* Confetti Rain */}
+                {Array.from({ length: 100 }).map((_, i) => (
+                  <div
+                    key={`confetti-${i}`}
+                    className="confetti absolute w-3 h-3 opacity-90"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 3}s`,
+                      animationDuration: `${2 + Math.random() * 2}s`,
+                      backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe', '#6ff6b7'][Math.floor(Math.random() * 9)],
+                      borderRadius: Math.random() > 0.5 ? '50%' : '0%',
+                    }}
+                  />
+                ))}
+
+                {/* Fireworks */}
+                {Array.from({ length: 20 }).map((_, i) => (
+                  <div
+                    key={`firework-${i}`}
+                    className="firework absolute"
+                    style={{
+                      left: `${10 + Math.random() * 80}%`,
+                      top: `${10 + Math.random() * 60}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                      animationDuration: `${1 + Math.random()}s`,
+                    }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500"></div>
+                    {Array.from({ length: 8 }).map((_, j) => (
+                      <div
+                        key={j}
+                        className="absolute w-1 h-8 bg-gradient-to-t from-transparent to-white"
+                        style={{
+                          transformOrigin: 'bottom center',
+                          transform: `rotate(${j * 45}deg) translateY(-20px)`,
+                          animationDelay: `${0.5 + Math.random() * 0.5}s`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+
+                {/* Sparkles */}
+                {Array.from({ length: 50 }).map((_, i) => (
+                  <div
+                    key={`sparkle-${i}`}
+                    className="sparkle absolute"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                    }}
+                  >
+                    <div className="w-2 h-2 bg-white transform rotate-45" style={{ clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }}></div>
+                  </div>
+                ))}
+
+                {/* Giant Success Message - Super Prominent */}
+                <div className="absolute inset-0 flex items-center justify-center z-30">
+                  <div className="text-center bounce bg-black bg-opacity-60 px-12 py-8 rounded-3xl border-4 border-white">
+                    <div 
+                      className="text-9xl font-black text-white mb-6 drop-shadow-2xl" 
+                      style={{ 
+                        textShadow: '6px 6px 12px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,1), 0 0 60px rgba(255,255,255,0.5)',
+                        filter: 'brightness(1.3) contrast(1.2)'
+                      }}
+                    >
+                      🎉 GRATTIS! 🎉
+                    </div>
+                    <div 
+                      className="text-7xl font-black text-yellow-300 mb-4 drop-shadow-xl"
+                      style={{ 
+                        textShadow: '4px 4px 8px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,0,0.8)',
+                        filter: 'brightness(1.2)'
+                      }}
+                    >
+                      MÅL UPPNÅTT!
+                    </div>
+                    <div 
+                      className="text-4xl font-bold text-green-300 mb-4 drop-shadow-lg"
+                      style={{ 
+                        textShadow: '2px 2px 6px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,0,0.6)'
+                      }}
+                    >
+                      {currentAmount.toLocaleString("sv-SE")} kr / {goalAmount.toLocaleString("sv-SE")} kr
+                    </div>
+                    <div 
+                      className="text-3xl font-bold text-white mt-4 drop-shadow-lg"
+                      style={{ 
+                        textShadow: '3px 3px 8px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.8)'
+                      }}
+                    >
+                      🚀 FANTASTISKT JOBBAT! 🚀
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Emojis */}
+                {Array.from({ length: 30 }).map((_, i) => (
+                  <div
+                    key={`emoji-${i}`}
+                    className="absolute text-6xl bounce"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                      animationDuration: `${1.5 + Math.random()}s`,
+                    }}
+                  >
+                    {['🎊', '🎉', '🥳', '🎈', '🏆', '⭐', '💫', '✨', '🌟', '🎯', '💰', '🔥', '👏', '🙌', '💪'][Math.floor(Math.random() * 15)]}
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* PHASE 2: Rocket Launch */}
+            {celebrationPhase === 1 && (
+              <>
+                {/* Space Background */}
+                <div className="absolute inset-0 bg-gradient-to-b from-purple-900 via-blue-900 to-black">
+                  {/* Stars */}
+                  {Array.from({ length: 200 }).map((_, i) => (
+                    <div
+                      key={`star-${i}`}
+                      className="absolute w-1 h-1 bg-white rounded-full sparkle"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 3}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Rocket */}
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2" style={{ animation: 'rocketLaunch 4s ease-out forwards' }}>
+                  <div className="text-9xl">🚀</div>
+                  {/* Rocket Trail */}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-8 h-32 bg-gradient-to-t from-orange-500 via-yellow-400 to-transparent opacity-80 rounded-full" style={{ animation: 'flameFlicker 0.2s infinite alternate' }}></div>
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-4 h-40 bg-gradient-to-t from-red-500 via-orange-400 to-transparent opacity-60 rounded-full" style={{ animation: 'flameFlicker 0.15s infinite alternate-reverse' }}></div>
+                </div>
+
+                {/* Launch Text */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center bounce">
+                    <div className="text-7xl font-black text-white mb-4 drop-shadow-2xl">
+                      🚀 LIFTOFF! 🚀
+                    </div>
+                    <div className="text-4xl font-bold text-yellow-300 drop-shadow-xl">
+                      Till månen och tillbaka!
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* PHASE 2: Saturn Message */}
+            {celebrationPhase === 2 && (
+              <>
+                {/* Space Background with Saturn */}
+                <div className="absolute inset-0 bg-gradient-to-b from-purple-900 via-indigo-900 to-black">
+                  {/* Stars */}
+                  {Array.from({ length: 150 }).map((_, i) => (
+                    <div
+                      key={`saturn-star-${i}`}
+                      className="absolute w-1 h-1 bg-white rounded-full sparkle"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 3}s`,
+                      }}
+                    />
+                  ))}
+                  
+                  {/* Saturn Planet */}
+                  <div className="absolute top-1/4 right-1/4 text-9xl bounce">🪐</div>
+                  
+                  {/* Traveling Rocket - Much More Prominent */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20" style={{ animation: 'rocketToSaturn 4s ease-in-out infinite' }}>
+                    <div className="text-9xl drop-shadow-2xl" style={{ filter: 'brightness(1.2) contrast(1.1)' }}>🚀</div>
+                    {/* Enhanced Rocket Trail */}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-8 h-32 bg-gradient-to-t from-orange-500 via-yellow-400 to-transparent opacity-90 rounded-full" style={{ animation: 'flameFlicker 0.2s infinite alternate' }}></div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-4 h-40 bg-gradient-to-t from-red-500 via-orange-400 to-transparent opacity-80 rounded-full" style={{ animation: 'flameFlicker 0.15s infinite alternate-reverse' }}></div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-48 bg-gradient-to-t from-white via-yellow-300 to-transparent opacity-60 rounded-full" style={{ animation: 'flameFlicker 0.1s infinite alternate' }}></div>
+                  </div>
+                  
+                  {/* Asteroid Belt */}
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div
+                      key={`asteroid-${i}`}
+                      className="absolute text-2xl sparkle"
+                      style={{
+                        left: `${20 + Math.random() * 60}%`,
+                        top: `${30 + Math.random() * 40}%`,
+                        animationDelay: `${Math.random() * 2}s`,
+                        animationDuration: `${2 + Math.random()}s`,
+                      }}
+                    >
+                      🪨
+                    </div>
+                  ))}
+                </div>
+
+                {/* Epic Saturn Message */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center bounce">
+                    <div className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
+                      Fuck it! 🪐
+                    </div>
+                    <div className="text-5xl font-bold text-yellow-300 mb-2 drop-shadow-xl">
+                      Vi kör Saturnus istället!
+                    </div>
+                    <div className="text-3xl font-semibold text-purple-300 drop-shadow-lg">
+                      Inget mål är för stort för oss! 🚀
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* PHASE 3: People Celebrating */}
+            {celebrationPhase === 3 && (
+              <>
+                {/* Office Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-white to-green-100">
+                  {/* Floating Success Bubbles */}
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <div
+                      key={`bubble-${i}`}
+                      className="absolute rounded-full bg-gradient-to-r from-green-400 to-blue-500 opacity-20"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        width: `${20 + Math.random() * 60}px`,
+                        height: `${20 + Math.random() * 60}px`,
+                        animation: `bounce ${1 + Math.random()}s infinite`,
+                        animationDelay: `${Math.random() * 2}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* People Celebrating - Diverse Team */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="grid grid-cols-4 gap-6 text-center">
+                    {/* Row 1 - Diverse people celebrating */}
+                    <div className="bounce text-7xl" style={{ animationDelay: '0s' }}>🙋🏻‍♂️</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '0.2s' }}>🙋🏽‍♀️</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '0.4s' }}>🙋🏿‍♂️</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '0.6s' }}>🙋🏾‍♀️</div>
+                    
+                    {/* Row 2 - More diverse celebration */}
+                    <div className="bounce text-7xl" style={{ animationDelay: '0.8s' }}>🙌🏼</div>
+                    <div className="bounce text-8xl" style={{ animationDelay: '1s' }}>🎉</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '1.2s' }}>🙌🏿</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '1.4s' }}>✋🏽</div>
+                    
+                    {/* Row 3 - High fives and celebration */}
+                    <div className="bounce text-7xl" style={{ animationDelay: '1.6s' }}>🤝🏻</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '1.8s' }}>👏🏾</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '2s' }}>🥳</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '2.2s' }}>🤝🏿</div>
+                    
+                    {/* Row 4 - More team celebration */}
+                    <div className="bounce text-7xl" style={{ animationDelay: '2.4s' }}>👨🏻‍💼</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '2.6s' }}>👩🏽‍💼</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '2.8s' }}>👨🏿‍💼</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '3s' }}>👩🏻‍💼</div>
+                  </div>
+                </div>
+
+                {/* Team Success Message */}
+                <div className="absolute top-16 left-1/2 transform -translate-x-1/2 text-center">
+                  <div className="text-6xl font-black text-green-600 mb-2 drop-shadow-xl bounce">
+                    TEAM REHNGRUPPEN!
+                  </div>
+                  <div className="text-4xl font-bold text-blue-600 drop-shadow-lg">
+                    Vi gjorde det tillsammans! 🏆
+                  </div>
+                </div>
+
+                {/* Cheering Sound Effect Simulation */}
+                <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-center">
+                  <div className="text-3xl font-bold text-purple-600 bounce">
+                    🎺 HOORAY! WOOHOO! YEAH! 🎺
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Pulsing Border (all phases) */}
+            <div className="absolute inset-4 border-8 border-white rounded-3xl pulse opacity-50"></div>
+            <div className="absolute inset-8 border-4 border-yellow-400 rounded-2xl pulse opacity-70" style={{ animationDelay: '0.5s' }}></div>
+          </div>
+        )}
+
+        <div className="h-full max-w-7xl mx-auto p-8 flex gap-8">
+          {/* Left Sidebar */}
+          <div className="w-80 flex-shrink-0 space-y-6">
+            {/* Stats Cards */}
+            <div className="space-y-4">
+              <Card className="border border-slate-200 bg-white">
+                <CardContent className="p-6">
+                  <div className="text-sm font-medium text-slate-600 mb-2">
+                    Målbelopp
+                  </div>
+                  <div className="text-3xl font-bold text-slate-900">
+                    {goalAmount.toLocaleString("sv-SE")} kr
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-slate-200 bg-white">
+                <CardContent className="p-6">
+                  <div className="text-sm font-medium text-slate-600 mb-2">
+                    Kvar till mål
+                  </div>
+                  <div className="text-3xl font-bold text-slate-900">
+                    {Math.max(0, goalAmount - currentAmount).toLocaleString(
+                      "sv-SE"
+                    )}{" "}
+                    kr
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Controls */}
+            <Card className="border border-slate-200 bg-white relative">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="absolute top-4 right-4 cursor-pointer h-8 w-8 text-slate-700 z-10"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+
+                <SheetContent
+                  side="left"
+                  className="w-96 bg-white border-slate-200"
+                >
+                  <SheetHeader className="border-b border-slate-200 pb-6 px-6 pt-6">
+                    <SheetTitle className="text-slate-900 text-xl font-semibold">
+                      Inställningar
+                    </SheetTitle>
+                  </SheetHeader>
+
+                  <div className="p-6 space-y-8">
+                    {/* Current Amount Section */}
+                    <div className="space-y-4">
                       <div>
-                        <label className="text-xs text-gray-400 block mb-1">Nuvarande belopp</label>
-                        <Input
-                          type="text"
-                          value={currentInputValue}
-                          onChange={handleCurrentInputChange}
-                          onKeyDown={handleCurrentKeyPress}
-                          autoFocus
-                          className="text-lg font-semibold bg-gray-700 border-gray-600 text-[#6ff6b7]"
-                        />
+                        <label className="text-base font-medium text-slate-900 block mb-2">
+                          Nuvarande belopp
+                        </label>
+                        <p className="text-sm text-slate-600 mb-4">
+                          Ange det aktuella fakturerade beloppet
+                        </p>
                       </div>
-                      <div className="flex gap-2 pt-1">
+                      <Input
+                        type="text"
+                        value={currentInputValue}
+                        onChange={handleCurrentInputChange}
+                        onKeyDown={handleCurrentKeyPress}
+                        className="h-12 text-base border-slate-300 focus:border-[#6ff6b7] focus:ring-[#6ff6b7]"
+                        placeholder={currentAmount.toLocaleString("sv-SE")}
+                        onFocus={() => {
+                          if (!currentInputValue) {
+                            setCurrentInputValue(currentAmount.toString());
+                          }
+                        }}
+                        onBlur={handleCurrentSave}
+                      />
+                      <div className="flex gap-3">
                         <Button
                           onClick={handleCurrentSave}
-                          className="flex-1 text-xs py-1 h-7 bg-transparent border hover:bg-green-900/20 cursor-pointer"
-                          style={{ 
-                            borderColor: "#6ff6b7",
-                            color: "#6ff6b7"
-                          }}
+                          variant="outline"
+                          className="flex-1 h-10 border-slate-300 text-slate-700 hover:bg-slate-50"
                         >
                           Spara
                         </Button>
                         <Button
                           onClick={handleCurrentCancel}
-                          className="flex-1 text-xs py-1 h-7 bg-transparent border border-gray-600 text-gray-400 hover:bg-gray-700 cursor-pointer"
+                          variant="outline"
+                          className="flex-1 h-10 border-slate-300 text-slate-700 hover:bg-slate-50"
                         >
-                          Avbryt
+                          Återställ
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 text-center">
-                        Eller tryck Enter för att spara
-                      </p>
                     </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <div className="text-3xl font-semibold text-white">
-                          {currentAmount.toLocaleString('sv-SE')} kr
-                        </div>
-                        <Edit3 className="h-5 w-5 text-gray-400 opacity-60" />
-                      </div>
-                      <p className="text-sm text-gray-400">
-                        Nuvarande belopp
-                      </p>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
 
-              <Card 
-                className="border border-gray-700 shadow-sm bg-gray-800/50 cursor-pointer hover:bg-gray-800/70 transition-colors"
-                onClick={!isEditingGoal ? handleGoalEdit : undefined}
-              >
-                <CardContent className="p-4">
-                  {isEditingGoal ? (
-                    <div className="space-y-3">
+                    {/* Goal Amount Section */}
+                    <div className="space-y-4">
                       <div>
-                        <label className="text-xs text-gray-400 block mb-1">Startbelopp</label>
-                        <Input
-                          type="text"
-                          value={startingInputValue}
-                          onChange={handleStartingInputChange}
-                          onKeyDown={handleGoalKeyPress}
-                          className="text-lg font-semibold bg-gray-700 border-gray-600 text-white"
-                        />
+                        <label className="text-base font-medium text-slate-900 block mb-2">
+                          Målbelopp
+                        </label>
+                        <p className="text-sm text-slate-600 mb-4">
+                          Sätt målet för totala faktureringar
+                        </p>
                       </div>
-                      <div>
-                        <label className="text-xs text-gray-400 block mb-1">Målbelopp</label>
-                        <Input
-                          type="text"
-                          value={goalInputValue}
-                          onChange={handleGoalInputChange}
-                          onKeyDown={handleGoalKeyPress}
-                          autoFocus
-                          className="text-lg font-semibold bg-gray-700 border-gray-600 text-white"
-                        />
-                      </div>
-                      <div className="flex gap-2 pt-1">
+                      <Input
+                        type="text"
+                        value={goalInputValue}
+                        onChange={handleGoalInputChange}
+                        onKeyDown={handleGoalKeyPress}
+                        className="h-12 text-base border-slate-300 focus:border-[#6ff6b7] focus:ring-[#6ff6b7]"
+                        placeholder={goalAmount.toLocaleString("sv-SE")}
+                        onFocus={() => {
+                          if (!goalInputValue) {
+                            setGoalInputValue(goalAmount.toString());
+                          }
+                        }}
+                        onBlur={handleGoalSave}
+                      />
+                      <div className="flex gap-3">
                         <Button
                           onClick={handleGoalSave}
-                          className="flex-1 text-xs py-1 h-7 bg-transparent border hover:bg-green-900/20 cursor-pointer"
-                          style={{ 
-                            borderColor: "#6ff6b7",
-                            color: "#6ff6b7"
-                          }}
+                          variant="outline"
+                          className="flex-1 h-10 border-slate-300 text-slate-700 hover:bg-slate-50"
                         >
                           Spara
                         </Button>
                         <Button
                           onClick={handleGoalCancel}
-                          className="flex-1 text-xs py-1 h-7 bg-transparent border border-gray-600 text-gray-400 hover:bg-gray-700 cursor-pointer"
+                          variant="outline"
+                          className="flex-1 h-10 border-slate-300 text-slate-700 hover:bg-slate-50"
                         >
-                          Avbryt
+                          Återställ
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 text-center">
-                        Eller tryck Enter för att spara
-                      </p>
                     </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <div className="text-3xl font-semibold text-white">
-                          {goalAmount.toLocaleString('sv-SE')} kr
-                        </div>
-                        <Edit3 className="h-5 w-5 text-gray-400 opacity-60" />
-                      </div>
-                      <p className="text-sm text-gray-400">
-                        Målbelopp 
-                      </p>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="border border-gray-700 shadow-sm bg-gray-800/50">
-                <CardContent className="p-4">
-                  <div className="text-3xl font-semibold text-white">
-                    {progress.toFixed(1)}%
                   </div>
-                  <p className="text-sm text-gray-400">
-                    Uppnått
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                </SheetContent>
+              </Sheet>
 
-            {/* Input Section */}
-            <Card className="border border-gray-700 shadow-sm bg-gray-800/50 flex-1">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-medium text-white">
-                  Lägg till belopp
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2">
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-3 block">
+                    Lägg till belopp
+                  </label>
                   <Input
                     type="text"
                     placeholder="Ange belopp"
                     value={inputValue}
                     onChange={handleInputChange}
                     onKeyPress={handleKeyPress}
-                    className="flex-1 text-sm bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+                    className="h-12 text-base border-slate-300 focus:border-[#6ff6b7] focus:ring-[#6ff6b7]"
                   />
-                  <Button
-                    onClick={handleAddAmount}
-                    disabled={!inputValue || isNaN(parseFloat(inputValue))}
-                    className="px-4 text-sm transition-all duration-200 hover:scale-105 active:scale-95 bg-transparent border-2 hover:bg-green-900/20"
-                    style={{ 
-                      borderColor: "#6ff6b7",
-                      color: "#6ff6b7",
-                      cursor: "pointer"
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "#8cf8c5"
-                      e.currentTarget.style.color = "#8cf8c5"
-                      e.currentTarget.style.backgroundColor = "rgba(111, 246, 183, 0.1)"
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "#6ff6b7"
-                      e.currentTarget.style.color = "#6ff6b7"
-                      e.currentTarget.style.backgroundColor = "transparent"
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Lägg till
-                  </Button>
                 </div>
-                
-                {remaining <= 0 && (
-                  <div className="p-3 bg-green-900/30 border border-green-700 rounded-md">
-                    <p className="text-xs font-medium text-green-300">
-                      Målet har uppnåtts!
-                    </p>
-                  </div>
-                )}
 
-                {/* Progress Indicator */}
-                <div className="pt-2">
-                  <div className="flex justify-between text-xs text-gray-300 mb-1">
-                    <span>Framsteg mot mål</span>
-                    <span>{progress.toFixed(1)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div
-                      className="h-2 rounded-full transition-all duration-500"
-                      style={{ 
-                        width: `${Math.min(progress, 100)}%`,
-                        backgroundColor: "#6ff6b7"
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>0 kr</span>
-                    <span>{goalAmount.toLocaleString('sv-SE')} kr</span>
-                  </div>
-                </div>
+                <Button
+                  onClick={handleAddAmount}
+                  variant="outline"
+                  className="w-full h-12 border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Lägg till
+                </Button>
               </CardContent>
             </Card>
-
           </div>
 
-                    {/* Chart Section */}
-          <div className="lg:col-span-2 relative">
-            <Card className="h-full border border-gray-700 shadow-sm bg-gray-800/50">
-              <CardContent className="p-4 h-full relative">
-                <ChartContainer
-                  config={chartConfig}
-                  className="h-full w-full"
-                >
+          {/* Chart Section */}
+          <div className="flex-1 min-h-0">
+            <Card className="h-full border border-slate-200 bg-white">
+              <CardContent className="p-8 h-full relative">
+                <ChartContainer config={chartConfig} className="h-full w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={data}
                       margin={{
-                        top: 30,
+                        top: 40,
                         right: 20,
                         left: 60,
-                        bottom: 30,
+                        bottom: 40,
                       }}
                     >
-                      <XAxis 
-                        dataKey="category" 
-                        hide
-                      />
-                      <YAxis 
+                      <XAxis dataKey="category" hide />
+                      <YAxis
                         domain={[0, goalAmount * 1.1]}
-                        tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                        className="text-xs text-gray-500"
+                        ticks={[
+                          0,
+                          goalAmount * 0.25,
+                          goalAmount * 0.5,
+                          goalAmount * 0.75,
+                          goalAmount,
+                          goalAmount * 1.1,
+                        ]}
+                        tickFormatter={(value) =>
+                          `${(value / 1000).toFixed(0)}k`
+                        }
+                        tick={(props) => {
+                          const { x, y, payload } = props;
+                          const isGoal = payload.value === goalAmount;
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              fill={isGoal ? "#6ff6b7" : "#64748b"}
+                              fontSize={isGoal ? 14 : 13}
+                              fontWeight={isGoal ? 600 : 500}
+                              textAnchor="end"
+                              dy="0.32em"
+                            >
+                              {`${(payload.value / 1000).toFixed(0)}k`}
+                            </text>
+                          );
+                        }}
+                        axisLine={{ stroke: "#e2e8f0", strokeWidth: 1 }}
+                        tickLine={{ stroke: "#e2e8f0", strokeWidth: 1 }}
                       />
                       <Bar
                         dataKey="amount"
                         fill="#180f26"
-                        stroke="#6ff6b7"
-                        strokeWidth={3}
-                        radius={[12, 12, 0, 0]}
-                        className="transition-all duration-300"
+                        stroke="none"
+                        radius={[8, 8, 0, 0]}
+                        className="transition-all duration-500"
                         style={{
-                          filter: isAnimating ? 'brightness(1.3)' : 'brightness(1)',
-                          animation: isAnimating ? 'barShimmer 0.8s ease-in-out 2' : 'none'
+                          filter: isAnimating
+                            ? "brightness(1.1)"
+                            : "brightness(1)",
+                          animation: isAnimating
+                            ? "barShimmer 2s ease-in-out 2"
+                            : "none",
                         }}
                       />
-                      {/* Border for dashes */}
                       <ReferenceLine
                         y={goalAmount}
                         stroke="#180f26"
-                        strokeDasharray="30 20"
-                        strokeWidth={12}
+                        strokeDasharray="8 4"
+                        strokeWidth={2}
+                        opacity={0.8}
                       />
-                      {/* Main dashed line */}
-                      <ReferenceLine
-                        y={goalAmount}
-                        stroke="#6ff6b7"
-                        strokeDasharray="30 20"
-                        strokeWidth={8}
-                      />
- 
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
-                
-                {/* Permanent Goal Amount Display */}
-                {currentAmount < goalAmount && (
-                  <div className="absolute inset-0 flex items-start justify-center pointer-events-none z-10">
-                    <div 
-                      className="text-3xl font-bold mt-12 text-gray-600"
-                      style={{ 
-                        marginLeft: "90px",
-                      }}
-                    >
-                      {goalAmount.toLocaleString('sv-SE')} kr
+
+                {/* Current Amount Display or Mission Accomplished */}
+                {currentAmount >= goalAmount && hasHitTarget && !isCelebrating ? (
+                  // Mission Accomplished - shown after celebration ends
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <div className="text-center">
+                      <div
+                        className="text-3xl font-bold mb-2 px-4 py-2 rounded-lg"
+                        style={{
+                          color: "#6ff6b7",
+                          backgroundColor: "#180f26",
+                          marginLeft: "60px",
+                        }}
+                      >
+                        MISSION ACCOMPLISHED
+                      </div>
+                      <div
+                        className="text-2xl font-semibold px-4 py-2 rounded-lg"
+                        style={{
+                          color: "white",
+                          backgroundColor: "#180f26",
+                          marginLeft: "60px",
+                        }}
+                      >
+                        {currentAmount.toLocaleString("sv-SE")} kr / {goalAmount.toLocaleString("sv-SE")} kr
+                      </div>
                     </div>
                   </div>
-                )}
-
-                {/* Permanent Current Amount Display */}
-                <div className="absolute inset-0 flex items-end justify-center pointer-events-none z-10">
-                  <div 
-                    className="text-3xl font-bold mb-14"
-                    style={{ 
-                      color: "#6ff6b7",
-                      // fontWeight: "",
-                      marginLeft: "90px",
-                    }}
-                  >
-                    {currentAmount.toLocaleString('sv-SE')} kr
+                ) : currentAmount / goalAmount > 0.15 && currentAmount < goalAmount ? (
+                  // Regular current amount display - only show if under target
+                  <div className="absolute inset-0 flex items-end justify-center pointer-events-none z-10">
+                    <div
+                      className="text-3xl font-semibold mb-12 px-3 py-1 rounded-md"
+                      style={{
+                        color: "white",
+                        backgroundColor: "#180f26",
+                        marginLeft: "60px",
+                      }}
+                    >
+                      {currentAmount.toLocaleString("sv-SE")} kr
+                    </div>
                   </div>
-                </div>
+                ) : null}
 
                 {/* Animation Overlay */}
                 {isAnimating && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                    <div 
-                      className="text-6xl font-bold"
-                      style={{ 
+                  <div
+                    className="absolute pointer-events-none z-10"
+                    style={{
+                      top:
+                        currentAmount / goalAmount >= 0.6
+                          ? `${100 - (currentAmount / goalAmount) * 100 + 25}%`
+                          : `${Math.max(
+                              8,
+                              (100 - (currentAmount / goalAmount) * 100) / 2
+                            )}%`,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      display: "flex",
+                      justifyContent: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <div
+                      className="text-4xl font-bold whitespace-nowrap px-3 py-1 rounded-md"
+                      style={{
                         color: "#6ff6b7",
-                        animation: "fadeSlideUp 2s ease-out forwards",
-                        fontWeight: "700",
-                        animationFillMode: "forwards",
-                        marginLeft: "90px"
+                        backgroundColor: "#180f26",
+                        animation: "fadeSlideUp 4s ease-out forwards",
+                        marginLeft: "60px",
                       }}
                     >
-                      +{addedAmount.toLocaleString('sv-SE')} kr
+                      +{addedAmount.toLocaleString("sv-SE")} kr
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
-
         </div>
       </div>
-    </div>
     </>
-  )
+  );
 }
