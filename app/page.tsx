@@ -83,21 +83,21 @@ export default function Home() {
           setCelebrationPhase(1);
         }, 4000);
         
-        // Phase 2: Saturn message (4 seconds later)
+        // Phase 2: Saturn message (6 seconds later - extended!)
         setTimeout(() => {
           setCelebrationPhase(2);
         }, 8000);
         
-        // Phase 3: People cheering (4 seconds later)
+        // Phase 3: People cheering (6 seconds later)
         setTimeout(() => {
           setCelebrationPhase(3);
-        }, 12000);
+        }, 14000);
         
         // End celebration (4 seconds later)
         setTimeout(() => {
           setIsCelebrating(false);
           setCelebrationPhase(0);
-        }, 16000);
+        }, 18000);
       }
       
       setTimeout(() => {
@@ -346,24 +346,51 @@ export default function Home() {
 
         @keyframes rocketToSaturn {
           0% {
-            transform: translateX(-150px) translateY(75px) scale(1.2) rotate(-20deg);
-            opacity: 0.8;
-          }
-          25% {
-            transform: translateX(-75px) translateY(37px) scale(1.5) rotate(-10deg);
+            transform: translateX(-200px) translateY(100px) scale(1.5) rotate(-15deg);
             opacity: 0.9;
           }
-          50% {
-            transform: translateX(0px) translateY(0px) scale(2) rotate(0deg);
+          20% {
+            transform: translateX(-100px) translateY(50px) scale(1.8) rotate(-8deg);
             opacity: 1;
           }
-          75% {
-            transform: translateX(75px) translateY(-37px) scale(1.5) rotate(10deg);
+          40% {
+            transform: translateX(0px) translateY(0px) scale(2.2) rotate(0deg);
+            opacity: 1;
+          }
+          60% {
+            transform: translateX(100px) translateY(-50px) scale(1.8) rotate(8deg);
+            opacity: 1;
+          }
+          80% {
+            transform: translateX(200px) translateY(-100px) scale(1.5) rotate(15deg);
             opacity: 0.9;
           }
           100% {
-            transform: translateX(150px) translateY(-75px) scale(1.2) rotate(20deg);
-            opacity: 0.8;
+            transform: translateX(400px) translateY(-200px) scale(1) rotate(25deg);
+            opacity: 0.3;
+          }
+        }
+
+        @keyframes logoSpin {
+          0% {
+            transform: rotate(0deg) scale(1);
+            filter: brightness(1) drop-shadow(0 0 10px rgba(255,255,255,0.5));
+          }
+          25% {
+            transform: rotate(90deg) scale(1.1);
+            filter: brightness(1.2) drop-shadow(0 0 20px rgba(255,255,255,0.8));
+          }
+          50% {
+            transform: rotate(180deg) scale(1.2);
+            filter: brightness(1.4) drop-shadow(0 0 30px rgba(255,255,255,1));
+          }
+          75% {
+            transform: rotate(270deg) scale(1.1);
+            filter: brightness(1.2) drop-shadow(0 0 20px rgba(255,255,255,0.8));
+          }
+          100% {
+            transform: rotate(360deg) scale(1);
+            filter: brightness(1) drop-shadow(0 0 10px rgba(255,255,255,0.5));
           }
         }
       `}</style>
@@ -553,8 +580,8 @@ export default function Home() {
                   {/* Saturn Planet */}
                   <div className="absolute top-1/4 right-1/4 text-9xl bounce">🪐</div>
                   
-                  {/* Traveling Rocket - Much More Prominent */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20" style={{ animation: 'rocketToSaturn 4s ease-in-out infinite' }}>
+                  {/* Traveling Rocket - Continuous Journey */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20" style={{ animation: 'rocketToSaturn 6s ease-out forwards' }}>
                     <div className="text-9xl drop-shadow-2xl" style={{ filter: 'brightness(1.2) contrast(1.1)' }}>🚀</div>
                     {/* Enhanced Rocket Trail */}
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-8 h-32 bg-gradient-to-t from-orange-500 via-yellow-400 to-transparent opacity-90 rounded-full" style={{ animation: 'flameFlicker 0.2s infinite alternate' }}></div>
@@ -618,42 +645,66 @@ export default function Home() {
                   ))}
                 </div>
 
-                {/* People Celebrating - Diverse Team */}
+                {/* People Celebrating - Adjusted Team */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="grid grid-cols-4 gap-6 text-center">
-                    {/* Row 1 - Diverse people celebrating */}
+                    {/* Row 1 - Mostly white with some diversity */}
                     <div className="bounce text-7xl" style={{ animationDelay: '0s' }}>🙋🏻‍♂️</div>
-                    <div className="bounce text-7xl" style={{ animationDelay: '0.2s' }}>🙋🏽‍♀️</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '0.2s' }}>🙋🏻‍♀️</div>
                     <div className="bounce text-7xl" style={{ animationDelay: '0.4s' }}>🙋🏿‍♂️</div>
-                    <div className="bounce text-7xl" style={{ animationDelay: '0.6s' }}>🙋🏾‍♀️</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '0.6s' }}>🙋🏻‍♀️</div>
                     
-                    {/* Row 2 - More diverse celebration */}
-                    <div className="bounce text-7xl" style={{ animationDelay: '0.8s' }}>🙌🏼</div>
+                    {/* Row 2 - More celebration */}
+                    <div className="bounce text-7xl" style={{ animationDelay: '0.8s' }}>🙌🏻</div>
                     <div className="bounce text-8xl" style={{ animationDelay: '1s' }}>🎉</div>
-                    <div className="bounce text-7xl" style={{ animationDelay: '1.2s' }}>🙌🏿</div>
-                    <div className="bounce text-7xl" style={{ animationDelay: '1.4s' }}>✋🏽</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '1.2s' }}>🙌🏻</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '1.4s' }}>✋🏻</div>
                     
                     {/* Row 3 - High fives and celebration */}
                     <div className="bounce text-7xl" style={{ animationDelay: '1.6s' }}>🤝🏻</div>
-                    <div className="bounce text-7xl" style={{ animationDelay: '1.8s' }}>👏🏾</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '1.8s' }}>👏🏻</div>
                     <div className="bounce text-7xl" style={{ animationDelay: '2s' }}>🥳</div>
                     <div className="bounce text-7xl" style={{ animationDelay: '2.2s' }}>🤝🏿</div>
                     
-                    {/* Row 4 - More team celebration */}
+                    {/* Row 4 - Professional team */}
                     <div className="bounce text-7xl" style={{ animationDelay: '2.4s' }}>👨🏻‍💼</div>
-                    <div className="bounce text-7xl" style={{ animationDelay: '2.6s' }}>👩🏽‍💼</div>
-                    <div className="bounce text-7xl" style={{ animationDelay: '2.8s' }}>👨🏿‍💼</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '2.6s' }}>👩🏻‍💼</div>
+                    <div className="bounce text-7xl" style={{ animationDelay: '2.8s' }}>👨🏻‍💼</div>
                     <div className="bounce text-7xl" style={{ animationDelay: '3s' }}>👩🏻‍💼</div>
                   </div>
                 </div>
 
-                {/* Team Success Message */}
-                <div className="absolute top-16 left-1/2 transform -translate-x-1/2 text-center">
-                  <div className="text-6xl font-black text-green-600 mb-2 drop-shadow-xl bounce">
-                    TEAM REHNGRUPPEN!
+                {/* SCREEN-DOMINATING REHNGRUPPEN LOGO */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  {/* MASSIVE SCREEN-FILLING Logo */}
+                  <div className="mb-8 flex justify-center w-full">
+                    <div 
+                      className="w-[90vw] h-[40vh] bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 rounded-3xl p-8 flex items-center justify-center border-8 border-white shadow-2xl"
+                      style={{ 
+                        animation: 'logoSpin 4s ease-in-out infinite',
+                        boxShadow: '0 0 100px rgba(255,255,255,1), 0 0 200px rgba(255,255,255,0.8), inset 0 0 50px rgba(255,255,255,0.3)'
+                      }}
+                    >
+                      <img 
+                        src="/rehngruppen-logo-white.svg" 
+                        alt="Rehngruppen Logo" 
+                        className="w-full h-full object-contain"
+                        style={{ 
+                          filter: 'brightness(4) contrast(2) drop-shadow(0 0 20px rgba(255,255,255,1)) drop-shadow(0 0 40px rgba(255,255,255,0.8))',
+                          transform: 'scale(1.1)'
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="text-4xl font-bold text-blue-600 drop-shadow-lg">
-                    Vi gjorde det tillsammans! 🏆
+                  
+                  {/* Supporting Text Below */}
+                  <div className="text-center z-10">
+                    <div className="text-4xl font-black text-green-600 mb-2 drop-shadow-xl bounce">
+                      TEAM REHNGRUPPEN!
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600 drop-shadow-lg">
+                      Vi gjorde det tillsammans! 🏆
+                    </div>
                   </div>
                 </div>
 
@@ -999,3 +1050,4 @@ export default function Home() {
     </>
   );
 }
+
