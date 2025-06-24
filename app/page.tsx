@@ -145,6 +145,51 @@ export default function Home() {
     const numericValue = currentInputValue.replace(/\s/g, "");
     const amount = parseFloat(numericValue);
     if (!isNaN(amount) && amount >= 0) {
+      const oldAmount = currentAmount;
+      const difference = amount - oldAmount;
+      
+      // If the new amount is higher, show the animation
+      if (difference > 0) {
+        const wasUnderTarget = oldAmount < goalAmount;
+        const isNowOverTarget = amount >= goalAmount;
+        
+        setAddedAmount(difference);
+        setIsAnimating(true);
+        
+        // Check if we just hit the target for the first time
+        if (wasUnderTarget && isNowOverTarget && !hasHitTarget) {
+          setHasHitTarget(true);
+          setIsCelebrating(true);
+          setCelebrationPhase(0);
+          
+          // Phase 1: Confetti & fireworks (4 seconds)
+          setTimeout(() => {
+            setCelebrationPhase(1);
+          }, 4000);
+          
+          // Phase 2: Saturn message (6 seconds later - extended!)
+          setTimeout(() => {
+            setCelebrationPhase(2);
+          }, 8000);
+          
+          // Phase 3: People cheering (6 seconds later)
+          setTimeout(() => {
+            setCelebrationPhase(3);
+          }, 14000);
+          
+          // End celebration (4 seconds later)
+          setTimeout(() => {
+            setIsCelebrating(false);
+            setCelebrationPhase(0);
+          }, 18000);
+        }
+        
+        setTimeout(() => {
+          setIsAnimating(false);
+          setAddedAmount(0);
+        }, 4000);
+      }
+      
       setCurrentAmount(amount);
     }
     setCurrentInputValue("");
@@ -388,7 +433,7 @@ export default function Home() {
         }
       `}</style>
 
-      <div className={`h-screen w-full font-[family-name:var(--font-geist-sans)] ${isCelebrating ? 'celebration-bg shake' : 'bg-slate-50'}`}>
+      <div className={`h-screen w-full font-[family-name:var(--font-geist-sans)] overflow-hidden ${isCelebrating ? 'celebration-bg shake' : 'bg-gradient-to-br from-slate-50 to-slate-100'}`}>
         {/* MASSIVE CELEBRATION OVERLAY */}
         {isCelebrating && (
           <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
@@ -717,28 +762,28 @@ export default function Home() {
           </div>
         )}
 
-        <div className="h-full max-w-7xl mx-auto p-8 flex gap-8">
+        <div className="h-screen max-w-7xl mx-auto p-4 flex gap-4 overflow-hidden">
           {/* Left Sidebar */}
-          <div className="w-80 flex-shrink-0 space-y-6">
+          <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
             {/* Stats Cards */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Card className="border border-slate-200 bg-white">
-                <CardContent className="p-6">
-                  <div className="text-sm font-medium text-slate-600 mb-2">
+                <CardContent className="p-4">
+                  <div className="text-sm font-medium text-slate-600 mb-1">
                     Målbelopp
                   </div>
-                  <div className="text-3xl font-bold text-slate-900">
+                  <div className="text-2xl font-bold text-slate-900">
                     {goalAmount.toLocaleString("sv-SE")} kr
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="border border-slate-200 bg-white">
-                <CardContent className="p-6">
-                  <div className="text-sm font-medium text-slate-600 mb-2">
+                <CardContent className="p-4">
+                  <div className="text-sm font-medium text-slate-600 mb-1">
                     Kvar till mål
                   </div>
-                  <div className="text-3xl font-bold text-slate-900">
+                  <div className="text-2xl font-bold text-slate-900">
                     {Math.max(0, goalAmount - currentAmount).toLocaleString(
                       "sv-SE"
                     )}{" "}
@@ -772,49 +817,7 @@ export default function Home() {
                   </SheetHeader>
 
                   <div className="p-6 space-y-8">
-                    {/* Current Amount Section */}
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-base font-medium text-slate-900 block mb-2">
-                          Nuvarande belopp
-                        </label>
-                        <p className="text-sm text-slate-600 mb-4">
-                          Ange det aktuella fakturerade beloppet
-                        </p>
-                      </div>
-                      <Input
-                        type="text"
-                        value={currentInputValue}
-                        onChange={handleCurrentInputChange}
-                        onKeyDown={handleCurrentKeyPress}
-                        className="h-12 text-base border-slate-300 focus:border-[#6ff6b7] focus:ring-[#6ff6b7]"
-                        placeholder={currentAmount.toLocaleString("sv-SE")}
-                        onFocus={() => {
-                          if (!currentInputValue) {
-                            setCurrentInputValue(currentAmount.toString());
-                          }
-                        }}
-                        onBlur={handleCurrentSave}
-                      />
-                      <div className="flex gap-3">
-                        <Button
-                          onClick={handleCurrentSave}
-                          variant="outline"
-                          className="flex-1 h-10 border-slate-300 text-slate-700 hover:bg-slate-50"
-                        >
-                          Spara
-                        </Button>
-                        <Button
-                          onClick={handleCurrentCancel}
-                          variant="outline"
-                          className="flex-1 h-10 border-slate-300 text-slate-700 hover:bg-slate-50"
-                        >
-                          Återställ
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Goal Amount Section */}
+                    {/* Goal Amount Section - Only goal amount in settings now */}
                     <div className="space-y-4">
                       <div>
                         <label className="text-base font-medium text-slate-900 block mb-2">
@@ -859,46 +862,88 @@ export default function Home() {
                 </SheetContent>
               </Sheet>
 
-              <CardContent className="p-6 space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-slate-700 mb-3 block">
-                    Lägg till belopp
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Ange belopp"
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onKeyPress={handleKeyPress}
-                    className="h-12 text-base border-slate-300 focus:border-[#6ff6b7] focus:ring-[#6ff6b7]"
-                  />
+              <CardContent className="p-4 space-y-4">
+                {/* Current Amount Section - moved from settings */}
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-2 block">
+                      Nuvarande belopp
+                    </label>
+                    <Input
+                      type="text"
+                      value={currentInputValue}
+                      onChange={handleCurrentInputChange}
+                      onKeyDown={handleCurrentKeyPress}
+                      className="h-10 text-sm border-slate-300 focus:border-[#6ff6b7] focus:ring-[#6ff6b7]"
+                      placeholder={currentAmount.toLocaleString("sv-SE")}
+                      onFocus={() => {
+                        if (!currentInputValue) {
+                          setCurrentInputValue(currentAmount.toString());
+                        }
+                      }}
+                      onBlur={handleCurrentSave}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleCurrentSave}
+                      variant="outline"
+                      className="flex-1 h-9 border-slate-300 text-slate-700 hover:bg-slate-50 text-sm"
+                    >
+                      Spara
+                    </Button>
+                    <Button
+                      onClick={handleCurrentCancel}
+                      variant="outline"
+                      className="flex-1 h-9 border-slate-300 text-slate-700 hover:bg-slate-50 text-sm"
+                    >
+                      Återställ
+                    </Button>
+                  </div>
                 </div>
 
-                <Button
-                  onClick={handleAddAmount}
-                  variant="outline"
-                  className="w-full h-12 border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  <Plus className="h-5 w-5 mr-2" />
-                  Lägg till
-                </Button>
+                {/* Add Amount Section */}
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-2 block">
+                      Lägg till belopp
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Ange belopp"
+                      value={inputValue}
+                      onChange={handleInputChange}
+                      onKeyPress={handleKeyPress}
+                      className="h-10 text-sm border-slate-300 focus:border-[#6ff6b7] focus:ring-[#6ff6b7]"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleAddAmount}
+                    variant="outline"
+                    className="w-full h-9 border-slate-300 text-slate-700 hover:bg-slate-50 text-sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Lägg till
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Chart Section */}
           <div className="flex-1 min-h-0">
-            <Card className="h-full border border-slate-200 bg-white">
-              <CardContent className="p-8 h-full relative">
-                <ChartContainer config={chartConfig} className="h-full w-full">
+            <Card className="h-full border border-slate-200 bg-white flex flex-col">
+              <CardContent className="p-4 flex-1 relative flex flex-col">
+                <ChartContainer config={chartConfig} className="flex-1 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={data}
                       margin={{
-                        top: 40,
+                        top: 20,
                         right: 20,
                         left: 60,
-                        bottom: 40,
+                        bottom: 20,
                       }}
                     >
                       <XAxis dataKey="category" hide />
