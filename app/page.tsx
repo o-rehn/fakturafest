@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Bar,
   BarChart,
@@ -12,7 +13,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, LogOut } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import {
   Sheet,
@@ -31,11 +32,12 @@ const chartConfig = {
 };
 
 export default function Home() {
-  const [currentAmount, setCurrentAmount] = useState(750000);
+  const router = useRouter();
+  const [currentAmount, setCurrentAmount] = useState(1235466);
   const [inputValue, setInputValue] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const [addedAmount, setAddedAmount] = useState(0);
-  const [goalAmount, setGoalAmount] = useState(2000000);
+  const [goalAmount, setGoalAmount] = useState(2410000);
   const [goalInputValue, setGoalInputValue] = useState("");
   const [currentInputValue, setCurrentInputValue] = useState("");
   const [isCelebrating, setIsCelebrating] = useState(false);
@@ -210,6 +212,11 @@ export default function Home() {
     } else if (e.key === "Escape") {
       handleCurrentCancel();
     }
+  };
+
+  const handleLogout = () => {
+    document.cookie = "authenticated=; path=/; max-age=0";
+    router.push("/login");
   };
 
   return (
@@ -759,7 +766,18 @@ export default function Home() {
           </div>
         )}
 
-        <div className="h-screen max-w-7xl mx-auto p-4 flex gap-4 overflow-hidden">
+        <div className="h-screen max-w-7xl mx-auto p-4 flex gap-4 overflow-hidden relative">
+          {/* Logout Button */}
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            size="sm"
+            className="absolute top-4 right-4 z-20 bg-white hover:bg-slate-50 border-slate-300 text-slate-700"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logga ut
+          </Button>
+
           {/* Left Sidebar */}
           <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
             {/* Stats Cards */}
