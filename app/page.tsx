@@ -22,6 +22,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 
 const chartConfig = {
@@ -43,6 +51,7 @@ export default function Home() {
   const [isCelebrating, setIsCelebrating] = useState(false);
   const [hasHitTarget, setHasHitTarget] = useState(false);
   const [celebrationPhase, setCelebrationPhase] = useState(0); // 0: confetti, 1: rocket, 2: people
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const data = [
     {
@@ -215,6 +224,10 @@ export default function Home() {
   };
 
   const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = () => {
     document.cookie = "authenticated=; path=/; max-age=0";
     router.push("/login");
   };
@@ -766,18 +779,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="h-screen max-w-7xl mx-auto p-4 flex gap-4 overflow-hidden relative">
-          {/* Logout Button */}
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-            size="sm"
-            className="absolute top-4 right-4 z-20 bg-white hover:bg-slate-50 border-slate-300 text-slate-700"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logga ut
-          </Button>
-
+        <div className="h-screen max-w-7xl mx-auto p-4 flex gap-4 overflow-hidden">
           {/* Left Sidebar */}
           <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
             {/* Stats Cards */}
@@ -815,11 +817,20 @@ export default function Home() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="absolute top-4 right-4 cursor-pointer h-8 w-8 text-slate-700 z-10"
+                    className="absolute top-4 right-12 cursor-pointer h-8 w-8 text-slate-700 z-10"
                   >
                     <Settings className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
+                
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="absolute top-4 right-4 cursor-pointer h-8 w-8 text-slate-700 z-10"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
 
                 <SheetContent
                   side="left"
@@ -944,6 +955,8 @@ export default function Home() {
                 </div>
               </CardContent>
             </Card>
+
+
           </div>
 
           {/* Chart Section */}
@@ -1100,6 +1113,32 @@ export default function Home() {
             </Card>
           </div>
         </div>
+        
+        {/* Logout Confirmation Dialog */}
+        <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Bekräfta utloggning</DialogTitle>
+              <DialogDescription>
+                Är du säker på att du vill logga ut?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowLogoutDialog(false)}
+              >
+                Nej
+              </Button>
+              <Button
+                onClick={confirmLogout}
+                className="bg-[#180f26] hover:bg-[#180f26]/90"
+              >
+                Ja, logga ut
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );
