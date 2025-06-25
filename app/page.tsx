@@ -647,9 +647,6 @@ export default function Home() {
                 {/* Epic Saturn Message */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center bounce">
-                    <div className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
-                      Fuck it! 🪐
-                    </div>
                     <div className="text-5xl font-bold text-yellow-300 mb-2 drop-shadow-xl">
                       Vi kör Saturnus istället!
                     </div>
